@@ -1,0 +1,5 @@
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "shion_dev"
+database_id = "f77bde28-5204-4433-bf6e-f14552b8ab2f"
+preview_database_id = "DB"
