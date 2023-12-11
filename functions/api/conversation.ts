@@ -17,8 +17,8 @@ import {
 	string,
 	union,
 } from "valibot";
-import * as schema from "../db/schema";
-import { Env } from "./env";
+import * as schema from "../../db/schema";
+import { Env } from "../env";
 
 const openAiJsonSchema = object({
 	title: string(),

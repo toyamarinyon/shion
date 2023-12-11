@@ -15,7 +15,7 @@ function App() {
 	const loaderData = useLoaderData();
 	const navigate = useNavigate();
 	const { messages, input, handleSubmit, handleInputChange, data } = useChat({
-		api: "/conversation",
+		api: "/api/conversation",
 		body: {
 			isNew: sessionId == null,
 			sessionId,
