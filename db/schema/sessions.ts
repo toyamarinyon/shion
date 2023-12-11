@@ -1,22 +1,24 @@
 import { createId } from "@paralleldrive/cuid2";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { createSelectSchema } from "drizzle-valibot";
+import { messages } from "./messages";
 
 export enum Role {
-	System = "system",
+	Assistant = "assistant",
 	User = "user",
 }
-type Message = {
-	role: Role;
-	content: string;
-};
+
 export const sessions = sqliteTable("sessions", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => createId()),
-	summary: text("summary").notNull(),
+	title: text("title").notNull(),
 	createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-	memory: text("memory", { mode: "json" })
-		.notNull()
-		.$type<{ messages: Message[] }>(),
 });
+
+export const selectSessionSchema = createSelectSchema(sessions);
+
+export const sessionsRelations = relations(sessions, ({ many }) => ({
+	messages: many(messages),
+}));

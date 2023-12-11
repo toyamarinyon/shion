@@ -1,6 +1,9 @@
 import { useChat } from "ai/react";
-import { useMemo } from "react";
-import { match } from "ts-pattern";
+import { useEffect, useMemo } from "react";
+import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
+import { P, match } from "ts-pattern";
+import { array, parse } from "valibot";
+import { selectMessagesSchema } from "../db/schema";
 // import { useState } from "react";
 // import useSWR from "swr";
 
@@ -13,12 +16,35 @@ type Conversation = {
 	response: string;
 };
 function App() {
-	const { messages, input, handleSubmit, handleInputChange } = useChat({
+	const { sessionId } = useParams<{ sessionId: string }>();
+	const loaderData = useLoaderData();
+	const navigate = useNavigate();
+	const { messages, input, handleSubmit, handleInputChange, data } = useChat({
 		api: "/conversation",
-		onFinish: (data) => {
-			console.log(data);
+		body: {
+			sessionId,
 		},
+		initialMessages: parse(array(selectMessagesSchema), loaderData).map(
+			({ id, role, content }) => ({
+				id,
+				role,
+				content,
+			}),
+		),
 	});
+	useEffect(() => {
+		if (sessionId != null) {
+			return;
+		}
+		const metadata = data?.[0] as Record<string, string>;
+		match(metadata)
+			.with({ sessionId: P.string }, ({ sessionId }) => {
+				navigate(`/sessions/${sessionId}`);
+			})
+			.otherwise(() => {
+				return;
+			});
+	}, [data, sessionId, navigate]);
 	const conversations = useMemo(() => {
 		const tmp: Conversation[] = [];
 		let lastRequestContent = "";
@@ -46,6 +72,7 @@ function App() {
 				<header>
 					<h1 className="text-2xl text-gray-500">Shion</h1>
 				</header>
+				<Link to="/sessions/o96x0vun6v4vvolhne2w3ipn">Go</Link>
 			</aside>
 			<main className="p-4 w-full">
 				<div className="bg-gray-100 flex flex-col p-4 rounded-lg h-full">
