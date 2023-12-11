@@ -3,41 +3,61 @@ import {
 	StreamingTextResponse,
 	experimental_StreamData,
 } from "ai";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import OpenAI from "openai";
-import { array, object, optional, parse, picklist, string } from "valibot";
+import { match } from "ts-pattern";
 import {
-	InsertMessages,
-	Role,
-	insertMessagesSchema,
-	messages,
-	sessions,
-} from "../db/schema";
+	array,
+	intersect,
+	literal,
+	object,
+	parse,
+	picklist,
+	string,
+	union,
+} from "valibot";
+import * as schema from "../db/schema";
 import { Env } from "./env";
 
-const requestSchema = object({
-	sessionId: optional(string()),
-	messages: array(
-		object({
-			role: picklist(["user", "assistant"]),
-			content: string(),
-		}),
-	),
+const openAiJsonSchema = object({
+	title: string(),
 });
+
+const messagesSchema = array(
+	object({
+		role: picklist(["user", "assistant"]),
+		content: string(),
+	}),
+);
+const bodySchema = union([
+	object({
+		isNew: literal(true),
+	}),
+	object({
+		isNew: literal(false),
+		sessionId: string(),
+	}),
+]);
+
+const requestSchema = intersect([
+	bodySchema,
+	object({ messages: messagesSchema }),
+]);
 
 export const createSession = async (env: Env) => {
 	const results = await drizzle(env.DB)
-		.insert(sessions)
+		.insert(schema.sessions)
 		.values({
 			title: "",
 		})
-		.returning({ insertedId: sessions.id });
+		.returning({ insertedId: schema.sessions.id });
 	return results[0].insertedId;
 };
 
 type CreateMessageArguments = {
 	env: Env;
-	messages: InsertMessages;
+	messages: schema.InsertMessages;
 };
 export const createMessages = async ({
 	env,
@@ -45,9 +65,9 @@ export const createMessages = async ({
 }: CreateMessageArguments) => {
 	const db = drizzle(env.DB);
 	return await db
-		.insert(messages)
-		.values(parse(insertMessagesSchema, insertMessages))
-		.returning({ insertedId: messages.id });
+		.insert(schema.messages)
+		.values(parse(schema.insertMessagesSchema, insertMessages))
+		.returning({ insertedId: schema.messages.id });
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
@@ -55,13 +75,15 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 		apiKey: env.OPENAI_API_KEY,
 	});
 	const body = await request.json();
-	const { messages, sessionId: requestSessionId } = parse(requestSchema, body);
-	const sessionId = requestSessionId ?? (await createSession(env));
+	const { messages, ...session } = parse(requestSchema, body);
+	const sessionId = session.isNew
+		? await createSession(env)
+		: session.sessionId;
 	await createMessages({
 		env,
 		messages: {
 			sessionId,
-			role: Role.User,
+			role: schema.Role.User,
 			content: messages[messages.length - 1].content,
 		},
 	});
@@ -77,10 +99,53 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 				env,
 				messages: {
 					sessionId,
-					role: Role.Assistant,
+					role: schema.Role.Assistant,
 					content: completion,
 				},
 			});
+			if (session.isNew) {
+				const db = drizzle(env.DB, {
+					schema,
+				});
+				const messages = await db.query.messages.findMany({
+					where: (messages, { eq }) => eq(messages.sessionId, sessionId),
+				});
+				const conversations = messages.map((message) =>
+					match(message)
+						.with({ role: "assistant" }, () => `AI: ${message.content}\n`)
+						.with({ role: "user" }, () => `User: ${message.content}\n`)
+						.otherwise(() => ""),
+				);
+				const response = await openai.chat.completions.create({
+					model: "gpt-3.5-turbo-1106",
+					response_format: { type: "json_object" },
+
+					messages: [
+						{
+							role: "system",
+							content:
+								"あなたはコピーライターです。ユーザーが入力した会話に20文字程度の見出しを日本語でつけてJSON形式で出力してください。JSONのkeyは'title'としてください。",
+						},
+						{
+							role: "user",
+							content: `これが会話です。
+"""
+${conversations}
+"""
+`,
+						},
+					],
+				});
+				const { title } = parse(
+					openAiJsonSchema,
+					JSON.parse(response.choices[0].message.content ?? "{}"),
+				);
+				await db
+					.update(schema.sessions)
+					.set({ title })
+					.where(eq(schema.sessions.id, sessionId))
+					.returning({ updatedId: schema.sessions.id });
+			}
 			data.close();
 		},
 		experimental_streamData: true,

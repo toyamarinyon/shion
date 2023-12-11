@@ -2,14 +2,9 @@ import { useChat } from "ai/react";
 import { useEffect, useMemo } from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { P, match } from "ts-pattern";
-import { array, parse } from "valibot";
+import { array, optional, parse } from "valibot";
 import { selectMessagesSchema } from "../db/schema";
-// import { useState } from "react";
-// import useSWR from "swr";
 
-// const fetcher = (...args: Parameters<typeof fetch>) =>
-// 	fetch(...args).then((res) => res.json());
-//
 type Conversation = {
 	id: string;
 	request: string;
@@ -22,15 +17,17 @@ function App() {
 	const { messages, input, handleSubmit, handleInputChange, data } = useChat({
 		api: "/conversation",
 		body: {
+			isNew: sessionId == null,
 			sessionId,
 		},
-		initialMessages: parse(array(selectMessagesSchema), loaderData).map(
-			({ id, role, content }) => ({
-				id,
-				role,
-				content,
-			}),
-		),
+		initialMessages: parse(
+			optional(array(selectMessagesSchema)),
+			loaderData,
+		)?.map(({ id, role, content }) => ({
+			id,
+			role,
+			content,
+		})),
 	});
 	useEffect(() => {
 		if (sessionId != null) {

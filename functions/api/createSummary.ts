@@ -55,7 +55,7 @@ ${conversations}
 	);
 	const results = await db
 		.update(sessions)
-		.set({ summary: title })
+		.set({ title })
 		.where(eq(sessions.id, sessionId))
 		.returning({ updatedId: sessions.id });
 	return new Response(JSON.stringify(results), {
