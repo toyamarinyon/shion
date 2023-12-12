@@ -5,10 +5,12 @@ import { array, parse } from "valibot";
 import { selectMessagesSchema } from "../db/schema";
 import App from "./App.tsx";
 import "./index.css";
+import "./markdown.css";
 
 const router = createBrowserRouter([
 	{
 		path: "/",
+
 		element: <App />,
 	},
 	{
