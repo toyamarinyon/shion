@@ -1,9 +1,10 @@
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import { PaperAirplaneIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { createId } from "@paralleldrive/cuid2";
 import { useChat } from "ai/react";
 import clsx from "clsx";
 import { marked } from "marked";
-import { useEffect, useMemo } from "react";
+import { FormEvent, useCallback, useMemo } from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import useSWR from "swr";
 import { P, match } from "ts-pattern";
@@ -14,21 +15,39 @@ const fetcher = (url: string) =>
 	fetch(url)
 		.then((res) => res.json())
 		.then((data) => parse(array(selectSessionSchema), data.sessions));
+
+const useSession = () => {
+	const { sessionId: sessionIdInParam } = useParams<{ sessionId: string }>();
+	const { sessionId, isNew } = useMemo(() => {
+		return {
+			sessionId: sessionIdInParam ?? createId(),
+			isNew: sessionIdInParam == null,
+		};
+	}, [sessionIdInParam]);
+	return { sessionId, isNew };
+};
 type Conversation = {
 	id: string;
 	request: string;
 	response: string;
 };
 function App() {
-	const { data: sessionData, isLoading } = useSWR("/api/sessions", fetcher);
-	const { sessionId } = useParams<{ sessionId: string }>();
+	const { data: sessionData, mutate } = useSWR("/api/sessions", fetcher);
+	const { sessionId, isNew } = useSession();
 	const loaderData = useLoaderData();
 	const navigate = useNavigate();
-	const { messages, input, handleSubmit, handleInputChange, data } = useChat({
+	const { messages, input, append, setInput, handleInputChange } = useChat({
+		id: sessionId,
 		api: "/api/conversation",
 		body: {
-			isNew: sessionId == null,
+			isNew,
 			sessionId,
+		},
+		onResponse: () => {
+			mutate();
+		},
+		onFinish: () => {
+			mutate();
 		},
 		initialMessages: parse(
 			optional(array(selectMessagesSchema)),
@@ -39,19 +58,7 @@ function App() {
 			content,
 		})),
 	});
-	useEffect(() => {
-		if (sessionId != null) {
-			return;
-		}
-		const metadata = data?.[0] as Record<string, string>;
-		match(metadata)
-			.with({ sessionId: P.string }, ({ sessionId }) => {
-				navigate(`/sessions/${sessionId}`);
-			})
-			.otherwise(() => {
-				return;
-			});
-	}, [data, sessionId, navigate]);
+
 	const conversations = useMemo(() => {
 		const tmp: Conversation[] = [];
 		let lastRequestContent = "";
@@ -82,6 +89,21 @@ function App() {
 		}
 		return tmp;
 	}, [messages]);
+	const handleSubmit = useCallback(
+		(e: FormEvent<HTMLFormElement>) => {
+			e.preventDefault();
+			if (input === "") {
+				return;
+			}
+			append({
+				role: "user",
+				content: input,
+			});
+			setInput("");
+			navigate(`/sessions/${sessionId}`);
+		},
+		[input, setInput, append, sessionId, navigate],
+	);
 	return (
 		<div className="flex h-screen bg-[#F6F3EE] overflow-hidden text-[#595959]">
 			<aside className="w-1/4 p-4">

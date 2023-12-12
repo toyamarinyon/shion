@@ -33,6 +33,7 @@ const messagesSchema = array(
 const bodySchema = union([
 	object({
 		isNew: literal(true),
+		sessionId: string(),
 	}),
 	object({
 		isNew: literal(false),
@@ -45,10 +46,11 @@ const requestSchema = intersect([
 	object({ messages: messagesSchema }),
 ]);
 
-export const createSession = async (env: Env) => {
+export const createSession = async (env: Env, sessionId: string) => {
 	const results = await drizzle(env.DB)
 		.insert(schema.sessions)
 		.values({
+			id: sessionId,
 			title: "",
 		})
 		.returning({ insertedId: schema.sessions.id });
@@ -75,10 +77,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 		apiKey: env.OPENAI_API_KEY,
 	});
 	const body = await request.json();
-	const { messages, ...session } = parse(requestSchema, body);
-	const sessionId = session.isNew
-		? await createSession(env)
-		: session.sessionId;
+	const { messages, isNew, sessionId } = parse(requestSchema, body);
+	if (isNew) {
+		await createSession(env, sessionId);
+	}
 	await createMessages({
 		env,
 		messages: {
@@ -103,7 +105,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 					content: completion,
 				},
 			});
-			if (session.isNew) {
+			if (isNew) {
 				const db = drizzle(env.DB, {
 					schema,
 				});
@@ -146,12 +148,8 @@ ${conversations}
 					.where(eq(schema.sessions.id, sessionId))
 					.returning({ updatedId: schema.sessions.id });
 			}
-			data.close();
 		},
-		experimental_streamData: true,
 	});
 
-	const data = new experimental_StreamData();
-	data.append({ sessionId });
-	return new StreamingTextResponse(stream, {}, data);
+	return new StreamingTextResponse(stream);
 };

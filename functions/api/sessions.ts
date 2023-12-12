@@ -4,7 +4,9 @@ import { Env } from "../env.js";
 
 export const onRequest: PagesFunction<Env> = async ({ env }) => {
 	const db = drizzle(env.DB, { schema });
-	const sessions = await db.query.sessions.findMany();
+	const sessions = await db.query.sessions.findMany({
+		orderBy: (sessions, { desc }) => [desc(sessions.createdAt)],
+	});
 	return new Response(JSON.stringify({ sessions }), {
 		headers: { "Content-Type": "application/json" },
 	});
