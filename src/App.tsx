@@ -7,7 +7,7 @@ import { marked } from "marked";
 import { FormEvent, useCallback, useMemo } from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import useSWR from "swr";
-import { P, match } from "ts-pattern";
+import { match } from "ts-pattern";
 import { array, optional, parse } from "valibot";
 import { selectMessagesSchema, selectSessionSchema } from "../db/schema";
 
