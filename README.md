@@ -1,30 +1,21 @@
-# React + TypeScript + Vite
+# Shion
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ChatGPT clone application that runs on edge environments such as Cloudflare Pages.
 
-Currently, two official plugins are available:
+<video src="./demo1.gif">
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Motivation
 
-## Expanding the ESLint configuration
+I've seen a lot of chatbot applications, but most of them use Langchain, and Langchain requires python, so it was a bit cumbersome to deploy.
+I wanted to create a chatbot that works in an edge environment like Cloudflare Pages.
+This application is a clone of ChatGPT, and requires only JavaScript no python so it can be deployed on edge environment like Cloudflare Pages.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## What is the name Shion?
 
-- Configure the top-level `parserOptions` property like this:
+Shion is a name of an AI from the anime Sing a Bit of Harmony(Japanese:「アイの歌声を聴かせて」).
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+In the movie, she searches for ways to make her human friends smile. I named this app after her in hopes that humans and AI can coexist in the future like in this movie.
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## How to use
+
+WIP
