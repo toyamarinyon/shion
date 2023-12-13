@@ -2,7 +2,7 @@
 
 ChatGPT clone application that runs on edge environments such as Cloudflare Pages.
 
-<img src="./demo1.gif" />
+<img src="./demo.gif" />
 
 ## Motivation
 
