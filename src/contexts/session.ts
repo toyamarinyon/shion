@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import { invariant } from "./invariant";
 
 type SessionState = {
 	id: string;
@@ -7,12 +8,6 @@ type SessionState = {
 export const SessionContext = createContext<SessionState | undefined>(
 	undefined,
 );
-
-const invariant = (value: unknown, message?: string) => {
-	if (value === false || value === null || typeof value === "undefined") {
-		throw new Error(message);
-	}
-};
 
 export const useSession = () => {
 	const context = useContext(SessionContext);
