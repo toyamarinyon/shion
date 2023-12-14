@@ -3,6 +3,7 @@ import { relations, sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import { messages } from "./messages";
+import { users } from "./users";
 
 export enum Role {
 	Assistant = "assistant",
@@ -14,6 +15,7 @@ export const sessions = sqliteTable("sessions", {
 		.primaryKey()
 		.$defaultFn(() => createId()),
 	title: text("title").notNull(),
+	userId: text("user_id").references(() => users.id),
 	createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 

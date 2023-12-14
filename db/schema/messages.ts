@@ -9,7 +9,7 @@ export const messages = sqliteTable("messages", {
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => createId()),
-	sessionId: text("session_id").notNull(),
+	sessionId: text("session_id").references(() => sessions.id),
 	role: text("role", { enum: ["user", "assistant"] }).notNull(),
 	content: text("content").notNull(),
 	createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
