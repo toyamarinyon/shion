@@ -4,7 +4,14 @@ import { createId } from "@paralleldrive/cuid2";
 import { useChat } from "ai/react";
 import clsx from "clsx";
 import { marked } from "marked";
-import { FormEvent, useCallback, useMemo } from "react";
+import {
+	ChangeEventHandler,
+	FormEvent,
+	startTransition,
+	useCallback,
+	useMemo,
+	useRef,
+} from "react";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import useSWR from "swr";
 import { match } from "ts-pattern";
@@ -36,7 +43,7 @@ function App() {
 	const { sessionId, isNew } = useSession();
 	const loaderData = useLoaderData();
 	const navigate = useNavigate();
-	const { messages, input, append, setInput, handleInputChange } = useChat({
+	const { messages, input, append, setInput } = useChat({
 		id: sessionId,
 		api: "/api/conversation",
 		body: {
@@ -92,7 +99,7 @@ function App() {
 	const handleSubmit = useCallback(
 		(e: FormEvent<HTMLFormElement>) => {
 			e.preventDefault();
-			if (input === "") {
+			if (input.trim() === "") {
 				return;
 			}
 			append({
@@ -104,6 +111,23 @@ function App() {
 		},
 		[input, setInput, append, sessionId, navigate],
 	);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const handleInputChange = useCallback<
+		ChangeEventHandler<HTMLTextAreaElement>
+	>(
+		(e) => {
+			setInput(e.target.value);
+			startTransition(() => {
+				if (textareaRef != null && textareaRef.current != null) {
+					textareaRef.current.style.height = "auto";
+					textareaRef.current.style.height =
+						textareaRef.current.scrollHeight + "px";
+				}
+			});
+		},
+		[setInput],
+	);
+
 	return (
 		<div className="flex h-screen bg-[#F6F3EE] overflow-hidden text-[#595959]">
 			<aside className="w-1/4 p-4">
@@ -130,6 +154,7 @@ function App() {
 											" pl-4 pr-6 py-2 rounded-[30px] flex items-center space-x-3 text-sm",
 											id === sessionId && "bg-[#fbe6d2]",
 											id !== sessionId && "hover:bg-[#FDF8F5]",
+											title == "" && "animate-pulse",
 										)}
 									>
 										<div
@@ -141,7 +166,11 @@ function App() {
 										>
 											<ChatBubbleLeftEllipsisIcon className="w-5 h-5 shrink-0" />
 										</div>
-										<span className=" truncate text-ellipsis">{title}</span>
+										{title == "" ? (
+											<span className=""></span>
+										) : (
+											<span className=" truncate text-ellipsis">{title}</span>
+										)}
 									</Link>
 								</li>
 							))}
@@ -150,7 +179,7 @@ function App() {
 				</nav>
 			</aside>
 			<main className="p-4 w-full">
-				<div className="bg-gray-50 flex flex-col p-4 rounded-[30px] h-full">
+				<div className="bg-gray-50 flex flex-col p-4 rounded-[30px] h-full space-y-4">
 					<section className="h-full overflow-y-scroll">
 						{conversations.length === 0 && (
 							<article className="p-4 ">
@@ -179,20 +208,24 @@ function App() {
 					<section className="mt-auto">
 						<form onSubmit={handleSubmit}>
 							<div className="flex space-x-2 justify-center">
-								<div className="bg-white px-8 py-4 flex items-center rounded-[30px] border-[#BDBDBD] border hover:border-[#757575] w-2/3 transition-[height]">
+								<label className="bg-white px-6 py-4 flex items-center rounded-[30px] border-[#BDBDBD] border hover:border-[#757575] focus-within:border-[#757575] w-2/3 transition-[height]">
 									<textarea
-										className="outline-none w-full resize-none text-lg"
-										rows={input.split("\n").length}
+										className="outline-none w-full resize-none text-lg transition-all"
 										onChange={handleInputChange}
 										value={input}
+										rows={1}
+										ref={textareaRef}
 									/>
 									<button
 										type="submit"
-										className={clsx(input.length === 0 ? "text-gray-300" : "")}
+										className={clsx(
+											input.trim().length === 0 ? "text-gray-300" : "",
+										)}
+										disabled={input.trim().length === 0}
 									>
 										<PaperAirplaneIcon className="w-6 h-6" />
 									</button>
-								</div>
+								</label>
 							</div>
 						</form>
 					</section>
