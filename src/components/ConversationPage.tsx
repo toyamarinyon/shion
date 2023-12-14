@@ -15,9 +15,9 @@ import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import useSWR from "swr";
 import { match } from "ts-pattern";
 import { array, optional, parse } from "valibot";
-import { selectMessagesSchema, selectSessionSchema } from "../db/schema";
-import { SessionListItem } from "./components/SessionListItem";
-import { SessionContext } from "./contexts/session";
+import { selectMessagesSchema, selectSessionSchema } from "../../db/schema";
+import { SessionListItem } from "../components/SessionListItem";
+import { SessionContext } from "../contexts/session";
 
 const fetcher = (url: string) =>
 	fetch(url)
@@ -39,7 +39,7 @@ type Conversation = {
 	request: string;
 	response: string;
 };
-function App() {
+export const ConversationPage: React.FC = () => {
 	const { data: sessionData, mutate } = useSWR("/api/sessions", fetcher);
 	const { sessionId, isNew } = useSession();
 	const loaderData = useLoaderData();
@@ -211,6 +211,4 @@ function App() {
 			</div>
 		</SessionContext.Provider>
 	);
-}
-
-export default App;
+};
