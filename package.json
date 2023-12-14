@@ -12,12 +12,14 @@
     "db:migration:apply:dev": "bun wrangler d1 migrations apply shion_dev --local"
   },
   "dependencies": {
+    "@cloudflare/pages-plugin-cloudflare-access": "^1.0.3",
     "@heroicons/react": "^2.0.18",
     "@paralleldrive/cuid2": "^2.2.2",
     "ai": "^2.2.28",
     "clsx": "^2.0.0",
     "drizzle-orm": "^0.29.1",
     "drizzle-valibot": "^0.1.1",
+    "framer-motion": "^10.16.16",
     "marked": "^11.0.1",
     "openai": "^4.20.1",
     "react": "^18.2.0",
