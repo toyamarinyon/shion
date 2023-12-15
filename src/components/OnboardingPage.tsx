@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useCallback, useMemo, useReducer, useState } from "react";
 import { Link } from "react-router-dom";
 import { match } from "ts-pattern";
+import { useAccess } from "../contexts/access";
 import { useAuth } from "../contexts/auth";
 
 type OnboardingState =
@@ -69,6 +70,7 @@ export const OnboardingPage: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, {
     step: "welcome",
   });
+  const { email } = useAccess();
   const { mutate } = useAuth();
   const handleSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
@@ -114,7 +116,7 @@ export const OnboardingPage: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1 }}
+                transition={{ delay: 1, duration: 0.8 }}
               >
                 <Link
                   to="/"
@@ -145,7 +147,9 @@ export const OnboardingPage: React.FC = () => {
               <div className="bg-indigo-50 rounded-xl px-4 py-2">
                 <span className="font-bold text-indigo-400">お知らせ</span>
                 <p>
-                  すでに認証は完了しています。あなたのメールアドレスは、toyamarinyon@gmail.comですね。教えていただいたお名前はこのメールアドレスに紐付けて覚えておくので、次回以降は入力いただきません。
+                  すでに認証は完了しています。あなたのメールアドレスは
+                  <span className="px-1">{email}</span>
+                  ですね。教えていただいたお名前はこのメールアドレスに紐付けて覚えておくので、次回以降は入力いただきません。
                 </p>
               </div>
             </div>
