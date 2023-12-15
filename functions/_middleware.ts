@@ -1,12 +1,17 @@
 import cloudflareAccessPlugin, {
   PluginData,
 } from "@cloudflare/pages-plugin-cloudflare-access";
+import { drizzle } from "drizzle-orm/d1";
+import * as schema from "../db/schema";
 import { Env } from "./env";
 
 type EmailContext = {
   email: string;
 };
-export type Context = PluginData & EmailContext;
+type DrizzleDBContext = {
+  db: ReturnType<typeof drizzle<typeof schema>>;
+};
+export type Context = PluginData & EmailContext & DrizzleDBContext;
 
 export const cloudflareAccess: PagesFunction<Env> = (context) => {
   const url = new URL(context.request.url);
@@ -39,4 +44,13 @@ export const cloudflareAccessEmail: PagesFunction<
   return next();
 };
 
-export const onRequest = [cloudflareAccess, cloudflareAccessEmail];
+export const drizzleDb: PagesFunction<
+  Env,
+  string,
+  PluginData & EmailContext & DrizzleDBContext
+> = ({ env, data, next }) => {
+  data.db = drizzle(env.DB, { schema });
+  return next();
+};
+
+export const onRequest = [cloudflareAccess, cloudflareAccessEmail, drizzleDb];
