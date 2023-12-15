@@ -1,27 +1,35 @@
 import { PropsWithChildren, useEffect, useState } from "react";
-import { match } from "ts-pattern";
+import useSWR from "swr";
+import { parse } from "valibot";
+import { selectUserSchema } from "../../db/schema";
 import { AuthContext, AuthState } from "./auth";
 
+const fetcher = (url: string) =>
+  fetch(url)
+    .then((res) => res.json())
+    .then((data) => parse(selectUserSchema, data.user));
+
 export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
-	const [authState, setAuth] = useState<AuthState>();
-	useEffect(() => {
-		fetch("/api/me").then((res) => {
-			match(res.status)
-				.with(200, () => {
-					setAuth({ isSignedIn: true });
-				})
-				.with(404, () => {
-					setAuth({ isSignedIn: false });
-				})
-				.otherwise(() => {
-					throw new Error("unexpected error");
-				});
-		});
-	}, []);
-	if (authState == null) {
-		return null;
-	}
-	return (
-		<AuthContext.Provider value={authState}>{children}</AuthContext.Provider>
-	);
+  const [authState, setAuth] = useState<Omit<AuthState, "mutate">>();
+  const { data, isLoading, error, mutate } = useSWR("/api/me", fetcher);
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    } else if (error != null) {
+      setAuth({ isSignedIn: false });
+    } else if (data == null) {
+      throw new Error("unexpected error");
+    } else {
+      setAuth({ isSignedIn: true });
+    }
+  }, [data, isLoading, error]);
+
+  if (authState == null) {
+    return null;
+  }
+  return (
+    <AuthContext.Provider value={{ ...authState, mutate }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

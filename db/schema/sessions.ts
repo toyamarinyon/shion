@@ -6,21 +6,23 @@ import { messages } from "./messages";
 import { users } from "./users";
 
 export enum Role {
-	Assistant = "assistant",
-	User = "user",
+  Assistant = "assistant",
+  User = "user",
 }
 
 export const sessions = sqliteTable("sessions", {
-	id: text("id")
-		.primaryKey()
-		.$defaultFn(() => createId()),
-	title: text("title").notNull(),
-	userId: text("user_id").references(() => users.id),
-	createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  title: text("title").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const selectSessionSchema = createSelectSchema(sessions);
 
 export const sessionsRelations = relations(sessions, ({ many }) => ({
-	messages: many(messages),
+  messages: many(messages),
 }));

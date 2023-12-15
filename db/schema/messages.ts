@@ -6,13 +6,15 @@ import { Input } from "valibot";
 import { sessions } from "./sessions";
 
 export const messages = sqliteTable("messages", {
-	id: text("id")
-		.primaryKey()
-		.$defaultFn(() => createId()),
-	sessionId: text("session_id").references(() => sessions.id),
-	role: text("role", { enum: ["user", "assistant"] }).notNull(),
-	content: text("content").notNull(),
-	createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => sessions.id),
+  role: text("role", { enum: ["user", "assistant"] }).notNull(),
+  content: text("content").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export type SelectMessage = typeof messages.$inferSelect;
@@ -21,8 +23,8 @@ export const selectMessagesSchema = createSelectSchema(messages);
 export type InsertMessages = Input<typeof insertMessagesSchema>;
 
 export const messageRelations = relations(messages, ({ one }) => ({
-	author: one(sessions, {
-		fields: [messages.sessionId],
-		references: [sessions.id],
-	}),
+  author: one(sessions, {
+    fields: [messages.sessionId],
+    references: [sessions.id],
+  }),
 }));
