@@ -1,4 +1,3 @@
-import { PluginData } from "@cloudflare/pages-plugin-cloudflare-access";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
@@ -15,6 +14,7 @@ import {
   union,
 } from "valibot";
 import * as schema from "../../db/schema";
+import { Context } from "../_middleware";
 import { Env } from "../env";
 
 const openAiJsonSchema = object({
@@ -81,7 +81,7 @@ export const createMessages = async ({
     .returning({ insertedId: schema.messages.id });
 };
 
-export const onRequestPost: PagesFunction<Env, string, PluginData> = async ({
+export const onRequestPost: PagesFunction<Env, string, Context> = async ({
   request,
   env,
   data,
@@ -92,11 +92,7 @@ export const onRequestPost: PagesFunction<Env, string, PluginData> = async ({
   const body = await request.json();
   const { messages, isNew, sessionId } = parse(requestSchema, body);
   if (isNew) {
-    await createSession(
-      env,
-      sessionId,
-      data.cloudflareAccess.JWT.payload.email ?? "noemail",
-    );
+    await createSession(env, sessionId, data.email);
   }
   await createMessages({
     env,
