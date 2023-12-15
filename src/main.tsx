@@ -7,9 +7,9 @@ import "./markdown.css";
 import { router } from "./router.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-	<React.StrictMode>
-		<AuthProvider>
-			<RouterProvider router={router} />
-		</AuthProvider>
-	</React.StrictMode>,
+  <React.StrictMode>
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  </React.StrictMode>,
 );
