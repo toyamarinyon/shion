@@ -1,15 +1,6 @@
 import { createContext, useContext } from "react";
 import { invariant } from "./invariant";
 
-type UsernameUnregisteredState = {
-  usernameState: "unregistered";
-};
-type UsernameRegisteredState = {
-  usernameState: "registered";
-  username: string;
-};
-type UserState = UsernameUnregisteredState | UsernameRegisteredState;
-
 export type AccessState = { email: string };
 
 export const AccessContext = createContext<AccessState | undefined>(undefined);
