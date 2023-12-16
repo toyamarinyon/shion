@@ -20,7 +20,7 @@ export const SessionListItem: React.FC<SessionListItemProps> = ({
           " pl-4 pr-6 py-2 rounded-[30px] flex items-center space-x-3 text-sm",
           id === sessionId && "bg-[#fbe6d2]",
           id !== sessionId && "hover:bg-[#FDF8F5]",
-          title == "" && "animate-pulse",
+          title === "" && "animate-pulse",
         )}
       >
         <div
@@ -32,10 +32,10 @@ export const SessionListItem: React.FC<SessionListItemProps> = ({
         >
           <ChatBubbleLeftEllipsisIcon className="w-5 h-5 shrink-0" />
         </div>
-        {title == "" ? (
-          <span className=""></span>
+        {title === "" ? (
+          <span />
         ) : (
-          <span className=" truncate text-ellipsis">{title}</span>
+          <span className="truncate text-ellipsis">{title}</span>
         )}
       </Link>
     </li>

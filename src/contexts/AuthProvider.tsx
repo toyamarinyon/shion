@@ -15,7 +15,8 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     if (isLoading) {
       return;
-    } else if (error != null) {
+    }
+    if (error != null) {
       setAuth({ isSignedIn: false });
     } else if (data == null) {
       throw new Error("unexpected error");

@@ -7,6 +7,7 @@ import "./index.css";
 import "./markdown.css";
 import { router } from "./router.tsx";
 
+// biome-ignore lint/style/noNonNullAssertion: ignore
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <AccessProvider>

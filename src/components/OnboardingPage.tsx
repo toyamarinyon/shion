@@ -60,11 +60,11 @@ export const OnboardingPage: React.FC = () => {
     const hour = now.getHours();
     if (hour >= 5 && hour < 12) {
       return "おはようございます。";
-    } else if (hour >= 12 && hour < 18) {
-      return "こんにちは。";
-    } else {
-      return "こんばんは。";
     }
+    if (hour >= 12 && hour < 18) {
+      return "こんにちは。";
+    }
+    return "こんばんは。";
   }, []);
   const [username, setUsername] = useState("");
   const [state, dispatch] = useReducer(reducer, {

@@ -5,16 +5,14 @@ export const SignedIn: React.FC<PropsWithChildren> = ({ children }) => {
   const { isSignedIn } = useSignIn();
   if (isSignedIn) {
     return <>{children}</>;
-  } else {
-    return null;
   }
+  return null;
 };
 
 export const SignedOut: React.FC<PropsWithChildren> = ({ children }) => {
   const { isSignedIn } = useSignIn();
   if (!isSignedIn) {
     return <>{children}</>;
-  } else {
-    return null;
   }
+  return null;
 };

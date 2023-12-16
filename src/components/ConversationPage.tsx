@@ -88,7 +88,7 @@ export const ConversationPage: React.FC = () => {
           lastRequestContent = "";
         });
     }
-    if (lastRequestId != "") {
+    if (lastRequestId !== "") {
       tmp.push({
         id: `${lastRequestId}-last`,
         request: lastRequestContent,
@@ -121,8 +121,7 @@ export const ConversationPage: React.FC = () => {
       startTransition(() => {
         if (textareaRef != null && textareaRef.current != null) {
           textareaRef.current.style.height = "auto";
-          textareaRef.current.style.height =
-            textareaRef.current.scrollHeight + "px";
+          textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
         }
       });
     },
@@ -175,10 +174,11 @@ export const ConversationPage: React.FC = () => {
                   <p>{request}</p>
                   <div
                     className="bg-white rounded-[30px] p-8 markdown"
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: marked is safe
                     dangerouslySetInnerHTML={{
                       __html: marked(response) as string,
                     }}
-                  ></div>
+                  />
                 </article>
               ))}
             </section>

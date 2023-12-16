@@ -10,15 +10,16 @@ const fetcher = (url: string) =>
 
 export const AccessProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [accessState, setAccessState] = useState<AccessState>();
-  const { data, isLoading, error } = useSWR("/api/access", fetcher);
+  const { data, isLoading } = useSWR("/api/access", fetcher);
   useEffect(() => {
     if (isLoading) {
       return;
-    } else if (data == null) {
+    }
+    if (data == null) {
       throw new Error("unexpected error");
     }
     setAccessState({ email: data.email });
-  }, [data, isLoading, error]);
+  }, [data, isLoading]);
 
   if (accessState == null) {
     return null;
