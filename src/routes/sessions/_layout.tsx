@@ -44,17 +44,17 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
               <span>会話を始める</span>
             </Link>
             <section className="space-y-2">
-              {/* <AnimatePresence initial={false}> */}
-              {sessions.length > 0 && (
-                <motion.h2
-                  className="text-sm pl-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  あなたの会話
-                </motion.h2>
-              )}
-              {/* </AnimatePresence> */}
+              <AnimatePresence initial={false}>
+                {sessions.length > 0 && (
+                  <motion.h2
+                    className="text-sm pl-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    あなたの会話
+                  </motion.h2>
+                )}
+              </AnimatePresence>
               <ul className="space-y-2">
                 <AnimatePresence initial={false}>
                   {sessions.map(({ id, title }) => (
