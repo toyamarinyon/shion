@@ -66,7 +66,17 @@ export const ConversationPage: React.FC = () => {
       content,
     })),
   });
-
+  const welcomeMessage = useMemo(() => {
+    const now = new Date();
+    const hour = now.getHours();
+    if (hour >= 5 && hour < 12) {
+      return "おはようございます。";
+    }
+    if (hour >= 12 && hour < 18) {
+      return "こんにちは。";
+    }
+    return "こんばんは。";
+  }, []);
   const conversations = useMemo(() => {
     const tmp: Conversation[] = [];
     let lastRequestContent = "";
@@ -142,11 +152,11 @@ export const ConversationPage: React.FC = () => {
               aria-current="page"
             >
               <PlusIcon className="w-4 h-4" />
-              <span>New session</span>
+              <span>会話を始める</span>
             </Link>
             <section className="space-y-2">
-              <h2 className="text-sm pl-4">Recent</h2>
-              <ul className="space-y-4">
+              <h2 className="text-sm pl-4">あなたの会話</h2>
+              <ul className="space-y-2">
                 {sessionData?.map(({ id, title }) => (
                   <SessionListItem key={id} id={id} title={title} />
                 ))}
@@ -159,13 +169,10 @@ export const ConversationPage: React.FC = () => {
             <section className="h-full overflow-y-scroll">
               {conversations.length === 0 && (
                 <article className="p-4 ">
-                  <header className="text-2xl font-bold">
-                    Welcome! I'm Shion
+                  <header className="text-2xl">
+                    {welcomeMessage}LLM実行環境のシオンです。
                   </header>
-                  <p>
-                    Your friendly AI companion. Let's chat and explore new
-                    possibilities together.
-                  </p>
+                  <p>どんなことをお手伝いしましょうか？</p>
                 </article>
               )}
 
