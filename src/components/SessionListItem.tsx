@@ -1,5 +1,6 @@
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useSession } from "../contexts/session";
 
@@ -13,7 +14,10 @@ export const SessionListItem: React.FC<SessionListItemProps> = ({
 }) => {
   const { id: sessionId } = useSession();
   return (
-    <li>
+    <motion.li
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+    >
       <Link
         to={`/sessions/${id}`}
         className={clsx(
@@ -38,6 +42,6 @@ export const SessionListItem: React.FC<SessionListItemProps> = ({
           <span className="truncate text-ellipsis">{title}</span>
         )}
       </Link>
-    </li>
+    </motion.li>
   );
 };

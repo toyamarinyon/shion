@@ -165,37 +165,51 @@ export const OnboardingPage: React.FC = () => {
             )}
           </section>
           <section className="mt-auto flex justify-center">
-            <form className="w-2/3 space-y-1" onSubmit={handleSubmit}>
-              <p className="text-sm px-6">
-                英数字、ひらがな、カタカナなんでも大丈夫です。10文字くらいが視認しやすくおすすめです。
-              </p>
-              <div className="flex space-x-2">
-                <label className="bg-white px-6 py-4 flex items-center rounded-[30px] border-[#BDBDBD] border hover:border-[#757575] focus-within:border-[#757575] transition-[height] w-full">
-                  <textarea
-                    className="outline-none w-full resize-none text-lg transition-all"
-                    rows={1}
-                    placeholder="お名前を入力してください"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-                  <button
-                    type="submit"
-                    disabled={
-                      username.trim().length === 0 ||
-                      state.step === "registeringUsername"
-                    }
-                    className={clsx(
-                      username.trim().length === 0 ||
-                      state.step === "registeringUsername"
-                        ? "text-gray-300"
-                        : "",
-                    )}
+            <AnimatePresence>
+              {match(state.step)
+                .with("welcome", "registeringUsername", "error", () => (
+                  <motion.div
+                    exit={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="w-2/3"
                   >
-                    <PaperAirplaneIcon className="w-6 h-6" />
-                  </button>
-                </label>
-              </div>
-            </form>
+                    <form className="space-y-1" onSubmit={handleSubmit}>
+                      <p className="text-sm px-6">
+                        英数字、ひらがな、カタカナなんでも大丈夫です。10文字くらいが視認しやすくおすすめです。
+                      </p>
+                      <div className="flex space-x-2">
+                        <label className="bg-white px-6 py-4 flex items-center rounded-[30px] border-[#BDBDBD] border hover:border-[#757575] focus-within:border-[#757575] transition-[height] w-full">
+                          <input
+                            name="username"
+                            data-1p-ignore
+                            className="outline-none w-full"
+                            placeholder="お名前を入力してください"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                          />
+                          <button
+                            type="submit"
+                            disabled={
+                              username.trim().length === 0 ||
+                              state.step === "registeringUsername"
+                            }
+                            className={clsx(
+                              username.trim().length === 0 ||
+                              state.step === "registeringUsername"
+                                ? "text-gray-300"
+                                : "",
+                            )}
+                          >
+                            <PaperAirplaneIcon className="w-6 h-6" />
+                          </button>
+                        </label>
+                      </div>
+                    </form>
+                  </motion.div>
+                ))
+                .otherwise(() => null)}
+            </AnimatePresence>
           </section>
         </div>
       </main>

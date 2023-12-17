@@ -3,6 +3,7 @@ import { invariant } from "./invariant";
 
 type SessionState = {
   id: string;
+  isNew: boolean;
 };
 
 export const SessionContext = createContext<SessionState | undefined>(
