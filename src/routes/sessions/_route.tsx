@@ -22,6 +22,7 @@ export const sessionRoute: RouteObject = {
   path: "/",
   loader: async () => {
     const json = await fetch("/api/sessions").then((res) => res.json());
+    console.log({ json, step: "layout" });
     return parse(rootLoaderSchema, json.sessions);
   },
   element: (
@@ -70,6 +71,7 @@ export const sessionRoute: RouteObject = {
         const json = await fetch(`/api/sessions/${params.sessionId}`).then(
           (res) => res.json(),
         );
+        console.log({ json, step: "session" });
         return parse(sessionLoaderSchema, json);
       },
       element: <Conversation />,
