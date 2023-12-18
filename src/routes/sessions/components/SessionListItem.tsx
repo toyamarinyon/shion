@@ -1,8 +1,8 @@
+import { useSession } from "@/contexts/session";
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useSession } from "../contexts/session";
 
 type SessionListItemProps = {
   id: string;
@@ -21,7 +21,7 @@ export const SessionListItem: React.FC<SessionListItemProps> = ({
       <Link
         to={`/sessions/${id}`}
         className={clsx(
-          " pl-4 pr-6 py-2 rounded-[30px] flex items-center space-x-3 text-sm",
+          " pl-4 pr-6 py-1 rounded-[30px] flex items-center space-x-3 text-sm",
           id === sessionId && "bg-[#fbe6d2]",
           id !== sessionId && "hover:bg-[#FDF8F5]",
           title === "" && "animate-pulse",

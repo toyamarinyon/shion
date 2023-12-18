@@ -1,3 +1,4 @@
+import { SessionContext } from "@/contexts/session";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { createId } from "@paralleldrive/cuid2";
 import { AnimatePresence, motion } from "framer-motion";
@@ -5,8 +6,7 @@ import { PropsWithChildren, useMemo } from "react";
 import { Link, useLoaderData, useParams } from "react-router-dom";
 import { array, parse } from "valibot";
 import { selectSessionSchema } from "../../../db/schema";
-import { SessionListItem } from "../../components/SessionListItem";
-import { SessionContext } from "../../contexts/session";
+import { SessionListItem } from "./components/SessionListItem";
 
 const useResolvedSession = () => {
   const { sessionId: sessionIdInParam } = useParams<{ sessionId: string }>();
@@ -30,14 +30,14 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
   return (
     <SessionContext.Provider value={{ id: sessionId, isNew }}>
       <div className="flex h-screen bg-[#F6F3EE] overflow-hidden text-[#595959]">
-        <aside className="w-1/4 p-4">
+        <aside className="w-1/4 py-4 pl-4 pr-2">
           <header>
-            <h1 className="text-4xl pl-2 shion">Shion</h1>
+            <h1 className="text-4xl pl-4 shion">Shion</h1>
           </header>
-          <nav className="mt-4 space-y-8">
+          <nav className="mt-4 space-y-6">
             <Link
               to="/"
-              className=" hover:text-gray-900 px-4 py-2 hover:bg-[#FDF8F5] rounded-[30px] flex items-center space-x-2"
+              className=" hover:text-gray-900 px-4 py-2 hover:bg-[#FDF8F5] rounded-[30px] flex items-center space-x-2 text-sm"
               aria-current="page"
             >
               <PlusIcon className="w-4 h-4" />
@@ -55,7 +55,7 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
                   </motion.h2>
                 )}
               </AnimatePresence>
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 <AnimatePresence initial={false}>
                   {sessions.map(({ id, title }) => (
                     <SessionListItem key={id} id={id} title={title} />
