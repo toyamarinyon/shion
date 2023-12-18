@@ -6,7 +6,7 @@ import * as Popover from "@radix-ui/react-popover";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { ReactNode, useCallback, useState } from "react";
-import { useFetcher } from "react-router-dom";
+import { FetcherWithComponents } from "react-router-dom";
 import { match } from "ts-pattern";
 import { nonOptional, parse } from "valibot";
 import { Session, insertSessionSchema } from "../../../../db/schema";
@@ -50,13 +50,14 @@ const VisibilitySettingButton: React.FC<VisibilitySettingButtonProps> = ({
   );
 };
 
-type VisibilitySettingProps = {
+type VisibilitySettingProps<TData = any> = {
   currentVisibility: Session["visibility"];
+  fetcher: FetcherWithComponents<TData>;
 };
 export const VisibilitySetting: React.FC<VisibilitySettingProps> = ({
   currentVisibility,
+  fetcher,
 }) => {
-  const fetcher = useFetcher();
   const visibility = match(fetcher.state)
     .with("idle", () => currentVisibility)
     .otherwise(() => {

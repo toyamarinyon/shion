@@ -10,7 +10,7 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { useNavigate, useRevalidator } from "react-router-dom";
+import { useFetcher, useNavigate, useRevalidator } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useSession } from "../../contexts/session";
 import { sessionLoaderSchema } from "./_route";
@@ -119,12 +119,16 @@ export const Conversation: React.FC = () => {
     },
     [setInput],
   );
+  const fetcher = useFetcher();
 
   return (
     <div className="bg-gray-50 flex flex-col p-4 rounded-[30px] h-full space-y-4">
       {conversations.length > 0 && (
         <header className="flex justify-end px-4 relative pr-7">
-          <VisibilitySetting currentVisibility={session.visibility} />
+          <VisibilitySetting
+            currentVisibility={session.visibility}
+            fetcher={fetcher}
+          />
         </header>
       )}
       <section className="h-full overflow-y-scroll">
