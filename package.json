@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "db:migration:create": "drizzle-kit generate:sqlite --schema=./db/schema/index.ts --out=./migrations",
-    "db:migration:apply:dev": "bun wrangler d1 migrations apply shion_dev --local"
+    "db:migration:apply:dev": "bun wrangler d1 migrations apply shion_dev --local",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@cloudflare/pages-plugin-cloudflare-access": "^1.0.3",
@@ -48,6 +49,7 @@
     "typescript": "^5.2.2",
     "vite": "^5.0.0",
     "vite-tsconfig-paths": "^4.2.2",
-    "wrangler": "^3.19.0"
+    "wrangler": "^3.19.0",
+    "husky": "^8.0.0"
   }
 }

@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+bunx @biomejs/biome check --apply ./src
+bunx @biomejs/biome check --apply ./db
+bunx @biomejs/biome check --apply ./functions
