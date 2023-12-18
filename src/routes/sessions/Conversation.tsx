@@ -42,6 +42,7 @@ export const Conversation: React.FC = () => {
     })),
     onResponse: () => {
       revalidator.revalidate();
+      navigate(`/sessions/${id}`);
     },
     onFinish: () => {
       revalidator.revalidate();
@@ -98,8 +99,7 @@ export const Conversation: React.FC = () => {
       content: input,
     });
     setInput("");
-    navigate(`/sessions/${id}`);
-  }, [append, input, navigate, id, setInput]);
+  }, [append, input, setInput]);
   const handleSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
