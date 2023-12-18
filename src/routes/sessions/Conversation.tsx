@@ -103,7 +103,7 @@ export const Conversation: React.FC = () => {
   const handleSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      startConversation;
+      startConversation();
     },
     [startConversation],
   );
