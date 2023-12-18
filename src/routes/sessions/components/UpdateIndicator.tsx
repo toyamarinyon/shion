@@ -1,4 +1,3 @@
-import { CheckIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 
 type UpdateIndicatorProps = {
