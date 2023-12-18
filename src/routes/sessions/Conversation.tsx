@@ -14,6 +14,7 @@ import { useFetcher, useNavigate, useRevalidator } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useSession } from "../../contexts/session";
 import { sessionLoaderSchema } from "./_route";
+import { UpdateIndicator } from "./components/UpdateIndicator";
 import { VisibilitySetting } from "./components/VisivilitySetting";
 
 type ConversationItem = {
@@ -128,6 +129,11 @@ export const Conversation: React.FC = () => {
           <VisibilitySetting
             currentVisibility={session.visibility}
             fetcher={fetcher}
+          />
+          <UpdateIndicator
+            loading={
+              fetcher.state === "loading" || fetcher.state === "submitting"
+            }
           />
         </header>
       )}
