@@ -1,5 +1,8 @@
 import { useParseLoaderData } from "@/hooks/useParseLoaderData";
-import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import {
+  GlobeAsiaAustraliaIcon,
+  PaperAirplaneIcon,
+} from "@heroicons/react/24/outline";
 import { useChat } from "ai/react";
 import clsx from "clsx";
 import { marked } from "marked";
@@ -28,6 +31,7 @@ export const Conversation: React.FC = () => {
   const revalidator = useRevalidator();
   const navigate = useNavigate();
   const { session } = useParseLoaderData(sessionLoaderSchema);
+  const { myOwnSession } = session;
   const { messages, input, append, setInput } = useChat({
     id,
     api: "/api/conversation",
@@ -126,15 +130,29 @@ export const Conversation: React.FC = () => {
     <div className="bg-gray-50 flex flex-col p-4 rounded-[30px] h-full space-y-4">
       {conversations.length > 0 && (
         <header className="flex justify-end px-4 relative pr-7">
-          <VisibilitySetting
-            currentVisibility={session.visibility}
-            fetcher={fetcher}
-          />
-          <UpdateIndicator
-            loading={
-              fetcher.state === "loading" || fetcher.state === "submitting"
-            }
-          />
+          {myOwnSession ? (
+            <>
+              <VisibilitySetting
+                currentVisibility={session.visibility}
+                fetcher={fetcher}
+              />
+              <UpdateIndicator
+                loading={
+                  fetcher.state === "loading" || fetcher.state === "submitting"
+                }
+              />
+            </>
+          ) : (
+            <div className="flex items-center">
+              <GlobeAsiaAustraliaIcon className="w-5 h-5" />
+              <p className="text-sm">
+                <span className="px-1 cursor-pointer hover:underline">
+                  {session.author.username}
+                </span>
+                がみんなに公開
+              </p>
+            </div>
+          )}
         </header>
       )}
       <section className="h-full overflow-y-scroll">
@@ -161,38 +179,40 @@ export const Conversation: React.FC = () => {
         ))}
       </section>
       <section className="mt-auto">
-        <form onSubmit={handleSubmit}>
-          <div className="flex space-x-2 justify-center items-center px-2">
-            <label className="bg-white px-6 py-4 flex items-center rounded-[30px] border-[#BDBDBD] border hover:border-[#757575] focus-within:border-[#757575] w-full">
-              <textarea
-                className="outline-none w-full resize-none pr-4"
-                onChange={handleInputChange}
-                value={input}
-                rows={1}
-                ref={textareaRef}
-                onKeyDown={(event) => {
-                  if (
-                    event.key === "Enter" &&
-                    !event.shiftKey &&
-                    !event.nativeEvent.isComposing
-                  ) {
-                    event.preventDefault();
-                    startConversation();
-                  }
-                }}
-              />
-              <button
-                type="submit"
-                className={clsx(
-                  input.trim().length === 0 ? "text-gray-300" : "",
-                )}
-                disabled={input.trim().length === 0}
-              >
-                <PaperAirplaneIcon className="w-6 h-6" />
-              </button>
-            </label>
-          </div>
-        </form>
+        {myOwnSession && (
+          <form onSubmit={handleSubmit}>
+            <div className="flex space-x-2 justify-center items-center px-2">
+              <label className="bg-white px-6 py-4 flex items-center rounded-[30px] border-[#BDBDBD] border hover:border-[#757575] focus-within:border-[#757575] w-full">
+                <textarea
+                  className="outline-none w-full resize-none pr-4"
+                  onChange={handleInputChange}
+                  value={input}
+                  rows={1}
+                  ref={textareaRef}
+                  onKeyDown={(event) => {
+                    if (
+                      event.key === "Enter" &&
+                      !event.shiftKey &&
+                      !event.nativeEvent.isComposing
+                    ) {
+                      event.preventDefault();
+                      startConversation();
+                    }
+                  }}
+                />
+                <button
+                  type="submit"
+                  className={clsx(
+                    input.trim().length === 0 ? "text-gray-300" : "",
+                  )}
+                  disabled={input.trim().length === 0}
+                >
+                  <PaperAirplaneIcon className="w-6 h-6" />
+                </button>
+              </label>
+            </div>
+          </form>
+        )}
       </section>
     </div>
   );

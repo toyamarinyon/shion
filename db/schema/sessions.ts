@@ -32,6 +32,10 @@ export const updateSessionSchema = partial(
 export const selectSessionSchema = createSelectSchema(sessions);
 export type Session = typeof sessions.$inferSelect;
 
-export const sessionsRelations = relations(sessions, ({ many }) => ({
+export const sessionsRelations = relations(sessions, ({ many, one }) => ({
   messages: many(messages),
+  author: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
 }));

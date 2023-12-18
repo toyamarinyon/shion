@@ -2,10 +2,11 @@ import { SignedIn, SignedOut } from "@/components/controlComponents";
 import { createId } from "@paralleldrive/cuid2";
 import { Navigate, Outlet, RouteObject } from "react-router-dom";
 import { match } from "ts-pattern";
-import { Input, array, merge, object, parse } from "valibot";
+import { Input, array, boolean, merge, object, parse } from "valibot";
 import {
   selectMessagesSchema,
   selectSessionSchema,
+  selectUserSchema,
   updateSessionSchema,
 } from "../../../db/schema";
 import { Conversation } from "./Conversation";
@@ -18,7 +19,9 @@ export const rootLoaderSchema = object({
 export const sessionLoaderSchema = object({
   session: merge([
     selectSessionSchema,
+    object({ author: selectUserSchema }),
     object({ messages: array(selectMessagesSchema) }),
+    object({ myOwnSession: boolean() }),
   ]),
 });
 
@@ -30,7 +33,6 @@ export const sessionRoute: RouteObject = {
       return null;
     }
     const json = await res.json();
-    console.log({ json });
     return parse(rootLoaderSchema, json);
   },
   element: (
@@ -53,10 +55,17 @@ export const sessionRoute: RouteObject = {
           session: {
             id: createId(),
             title: "",
+            author: {
+              id: "current_user",
+              username: "current_username",
+              email: "current_email",
+              createdAt: new Date().toISOString(),
+            },
             messages: [],
             visibility: "private",
             userId: "current_user",
             createdAt: new Date().toISOString(),
+            myOwnSession: true,
           },
         };
         return newSession;
@@ -86,6 +95,7 @@ export const sessionRoute: RouteObject = {
         const json = await fetch(`/api/sessions/${params.sessionId}`).then(
           (res) => res.json(),
         );
+        console.log({ json });
         return parse(sessionLoaderSchema, json);
       },
       element: <Conversation />,
