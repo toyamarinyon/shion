@@ -1,7 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations, sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { createSelectSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema } from "drizzle-valibot";
+import { partial, pick } from "valibot";
 import { messages } from "./messages";
 import { users } from "./users";
 
@@ -24,7 +25,12 @@ export const sessions = sqliteTable("sessions", {
     .default("private"),
 });
 
+export const insertSessionSchema = createInsertSchema(sessions);
+export const updateSessionSchema = partial(
+  pick(insertSessionSchema, ["title", "visibility"]),
+);
 export const selectSessionSchema = createSelectSchema(sessions);
+export type Session = typeof sessions.$inferSelect;
 
 export const sessionsRelations = relations(sessions, ({ many }) => ({
   messages: many(messages),
