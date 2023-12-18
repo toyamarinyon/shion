@@ -1,11 +1,11 @@
 import { SessionContext } from "@/contexts/session";
+import { useParseLoaderData } from "@/hooks/useParseLoaderData";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { createId } from "@paralleldrive/cuid2";
 import { AnimatePresence, motion } from "framer-motion";
 import { PropsWithChildren, useMemo } from "react";
-import { Link, useLoaderData, useParams } from "react-router-dom";
-import { array, parse } from "valibot";
-import { selectSessionSchema } from "../../../db/schema";
+import { Link, useParams } from "react-router-dom";
+import { rootLoaderSchema } from "./_route";
 import { SessionListItem } from "./components/SessionListItem";
 
 const useResolvedSession = () => {
@@ -21,11 +21,7 @@ const useResolvedSession = () => {
 
 export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
   const { sessionId, isNew } = useResolvedSession();
-  const loaderData = useLoaderData();
-  const sessions = useMemo(
-    () => parse(array(selectSessionSchema), loaderData),
-    [loaderData],
-  );
+  const { sessions, everybodySessions } = useParseLoaderData(rootLoaderSchema);
 
   return (
     <SessionContext.Provider value={{ id: sessionId, isNew }}>
@@ -58,6 +54,26 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
               <ul className="space-y-1">
                 <AnimatePresence initial={false}>
                   {sessions.map(({ id, title }) => (
+                    <SessionListItem key={id} id={id} title={title} />
+                  ))}
+                </AnimatePresence>
+              </ul>
+            </section>
+            <section className="space-y-2">
+              <AnimatePresence initial={false}>
+                {everybodySessions.length > 0 && (
+                  <motion.h2
+                    className="text-sm pl-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    みんなの会話
+                  </motion.h2>
+                )}
+              </AnimatePresence>
+              <ul className="space-y-1">
+                <AnimatePresence initial={false}>
+                  {everybodySessions.map(({ id, title }) => (
                     <SessionListItem key={id} id={id} title={title} />
                   ))}
                 </AnimatePresence>

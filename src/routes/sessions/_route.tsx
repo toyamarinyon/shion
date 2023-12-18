@@ -1,5 +1,6 @@
+import { SignedIn, SignedOut } from "@/components/controlComponents";
 import { createId } from "@paralleldrive/cuid2";
-import { Outlet, RouteObject } from "react-router-dom";
+import { Navigate, Outlet, RouteObject } from "react-router-dom";
 import { match } from "ts-pattern";
 import { Input, array, merge, object, parse } from "valibot";
 import {
@@ -10,7 +11,10 @@ import {
 import { Conversation } from "./Conversation";
 import { Layout } from "./_layout";
 
-const rootLoaderSchema = array(selectSessionSchema);
+export const rootLoaderSchema = object({
+  sessions: array(selectSessionSchema),
+  everybodySessions: array(selectSessionSchema),
+});
 export const sessionLoaderSchema = object({
   session: merge([
     selectSessionSchema,
@@ -21,14 +25,25 @@ export const sessionLoaderSchema = object({
 export const sessionRoute: RouteObject = {
   path: "/",
   loader: async () => {
-    const json = await fetch("/api/sessions").then((res) => res.json());
-    console.log({ json, step: "layout" });
-    return parse(rootLoaderSchema, json.sessions);
+    const res = await fetch("/api/sessions");
+    if (res.status !== 200) {
+      return null;
+    }
+    const json = await res.json();
+    console.log({ json });
+    return parse(rootLoaderSchema, json);
   },
   element: (
-    <Layout>
-      <Outlet />
-    </Layout>
+    <>
+      <SignedIn>
+        <Layout>
+          <Outlet />
+        </Layout>
+      </SignedIn>
+      <SignedOut>
+        <Navigate to="/onboarding" />
+      </SignedOut>
+    </>
   ),
   children: [
     {
@@ -71,7 +86,6 @@ export const sessionRoute: RouteObject = {
         const json = await fetch(`/api/sessions/${params.sessionId}`).then(
           (res) => res.json(),
         );
-        console.log({ json, step: "session" });
         return parse(sessionLoaderSchema, json);
       },
       element: <Conversation />,

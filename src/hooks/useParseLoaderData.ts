@@ -7,7 +7,6 @@ export const useParseLoaderData = <TSchema extends BaseSchema>(
 ) => {
   const loaderData = useLoaderData();
 
-  console.log({ loaderData, step: "parseLoaderData" });
   const parsedLoaderData = useMemo(
     () => parse(schema, loaderData),
     [schema, loaderData],

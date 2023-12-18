@@ -12,13 +12,17 @@ export const onRequest: PagesFunction<Env, string, Context> = async ({
     where: (users, { eq }) => eq(users.email, data.email),
   });
   if (user == null) {
-    return new Response("No user found", { status: 500 });
+    return new Response("No user found", { status: 400 });
   }
   const sessions = await db.query.sessions.findMany({
-    where: (sessions, { eq }) => eq(sessions.userId, user?.id ?? "nouser"),
+    where: (sessions, { eq }) => eq(sessions.userId, user.id),
     orderBy: (sessions, { desc }) => [desc(sessions.createdAt)],
   });
-  return new Response(JSON.stringify({ sessions }), {
+  const everybodySessions = await db.query.sessions.findMany({
+    where: (sessions, { eq, not, and }) =>
+      and(eq(sessions.visibility, "public"), not(eq(sessions.userId, user.id))),
+  });
+  return new Response(JSON.stringify({ sessions, everybodySessions }), {
     headers: { "Content-Type": "application/json" },
   });
 };
