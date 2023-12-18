@@ -50,7 +50,7 @@ const VisibilitySettingButton: React.FC<VisibilitySettingButtonProps> = ({
   );
 };
 
-type VisibilitySettingProps<TData = any> = {
+type VisibilitySettingProps<TData = unknown> = {
   currentVisibility: Session["visibility"];
   fetcher: FetcherWithComponents<TData>;
 };
