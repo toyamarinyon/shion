@@ -91,8 +91,29 @@ export const onRequestPost: PagesFunction<Env, string, Context> = async ({
   });
   const body = await request.json();
   const { messages, isNew, sessionId } = parse(requestSchema, body);
+  const currentUser = await data.db.query.users.findFirst({
+    where: (users, { eq }) => eq(users.email, data.email),
+  });
+
+  if (currentUser == null) {
+    throw new Error(`User not found: ${data.email}`);
+  }
   if (isNew) {
-    await createSession(env, sessionId, data.email);
+    await data.db.insert(schema.sessions).values({
+      id: sessionId,
+      userId: currentUser.id,
+      title: "",
+    });
+  } else {
+    const session = await data.db.query.sessions.findFirst({
+      where: (sessions, { eq }) => eq(sessions.id, sessionId),
+    });
+    if (session == null) {
+      throw new Error(`Session not found: ${sessionId}`);
+    }
+    if (session.userId !== currentUser.id) {
+      throw new Error(`Session not found: ${sessionId}`);
+    }
   }
   await createMessages({
     env,
@@ -119,10 +140,7 @@ export const onRequestPost: PagesFunction<Env, string, Context> = async ({
         },
       });
       if (isNew) {
-        const db = drizzle(env.DB, {
-          schema,
-        });
-        const messages = await db.query.messages.findMany({
+        const messages = await data.db.query.messages.findMany({
           where: (messages, { eq }) => eq(messages.sessionId, sessionId),
         });
         const conversations = messages.map((message) =>
@@ -155,7 +173,7 @@ ${conversations}
           openAiJsonSchema,
           JSON.parse(response.choices[0].message.content ?? "{}"),
         );
-        await db
+        await data.db
           .update(schema.sessions)
           .set({ title })
           .where(eq(schema.sessions.id, sessionId))

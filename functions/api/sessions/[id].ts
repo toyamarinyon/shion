@@ -24,8 +24,12 @@ export const onRequestGet: PagesFunction<Env, string, Context> = async ({
       author: true,
     },
   });
+  const myOwnSession = session?.userId === currentUser.id;
+  if (!myOwnSession && session?.visibility === "private") {
+    throw new Error(`Session not found: ${sessionId}`);
+  }
   return json({
-    session: { ...session, myOwnSession: session?.userId === currentUser.id },
+    session: { ...session, myOwnSession },
   });
 };
 
@@ -34,6 +38,12 @@ export const onRequestPut: PagesFunction<Env, string, Context> = async ({
   data,
   request,
 }) => {
+  const currentUser = await data.db.query.users.findFirst({
+    where: (users, { eq }) => eq(users.email, data.email),
+  });
+  if (currentUser == null) {
+    throw new Error(`User not found: ${data.email}`);
+  }
   const unsafeJson = await request.json();
   const payload = parse(updateSessionSchema, unsafeJson);
   const sessionId = parse(string(), params.id);
@@ -51,5 +61,12 @@ export const onRequestPut: PagesFunction<Env, string, Context> = async ({
       author: true,
     },
   });
-  return json({ session });
+  const myOwnSession = session?.userId === currentUser.id;
+  if (!myOwnSession && session?.visibility === "private") {
+    throw new Error(`Session not found: ${sessionId}`);
+  }
+
+  return json({
+    session: { ...session, myOwnSession },
+  });
 };
