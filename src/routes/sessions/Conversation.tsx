@@ -1,13 +1,8 @@
 import { useParseLoaderData } from "@/hooks/useParseLoaderData";
-import { LockClosedIcon } from "@heroicons/react/24/outline";
-import {
-  GlobeAsiaAustraliaIcon,
-  PaperAirplaneIcon,
-} from "@heroicons/react/24/outline";
-import * as Popover from "@radix-ui/react-popover";
+import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import { useChat } from "ai/react";
 import clsx from "clsx";
-import { AnimatePresence, motion } from "framer-motion";
+import { Session } from "db/schema";
 import { marked } from "marked";
 import {
   ChangeEventHandler,
@@ -18,9 +13,9 @@ import {
 } from "react";
 import { useNavigate, useRevalidator } from "react-router-dom";
 import { match } from "ts-pattern";
-import { optional } from "valibot";
 import { useSession } from "../../contexts/session";
 import { sessionLoaderSchema } from "./_route";
+import { VisibilitySetting } from "./components/VisivilitySetting";
 
 type ConversationItem = {
   id: string;
@@ -32,7 +27,7 @@ export const Conversation: React.FC = () => {
   const { id, isNew } = useSession();
   const revalidator = useRevalidator();
   const navigate = useNavigate();
-  const loaderData = useParseLoaderData(optional(sessionLoaderSchema));
+  const { session } = useParseLoaderData(sessionLoaderSchema);
   const { messages, input, append, setInput } = useChat({
     id,
     api: "/api/conversation",
@@ -40,13 +35,11 @@ export const Conversation: React.FC = () => {
       isNew,
       sessionId: id,
     },
-    initialMessages: loaderData?.session.messages.map(
-      ({ id, role, content }) => ({
-        id,
-        role,
-        content,
-      }),
-    ),
+    initialMessages: session.messages.map(({ id, role, content }) => ({
+      id,
+      role,
+      content,
+    })),
     onResponse: () => {
       revalidator.revalidate();
     },
@@ -130,58 +123,11 @@ export const Conversation: React.FC = () => {
 
   return (
     <div className="bg-gray-50 flex flex-col p-4 rounded-[30px] h-full space-y-4">
-      <header className="flex justify-end px-4">
-        <Popover.Root>
-          <Popover.Trigger asChild>
-            <button className="flex items-center flex-shrink-0 space-x-1 cursor-pointer">
-              <LockClosedIcon className="w-5 h-5" />
-              <span className="text-sm">自分だけ</span>
-            </button>
-          </Popover.Trigger>
-          <Popover.Portal>
-            <Popover.Content align="end" sideOffset={10}>
-              <AnimatePresence>
-                <motion.div
-                  className="bg-white drop-shadow-lg p-4 rounded-xl w-[350px] flex flex-col text-sm text-[#595959] space-y-2"
-                  initial={{
-                    y: 10,
-                  }}
-                  animate={{ y: 0 }}
-                  exit={{ y: 10 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <header className="flex items-center justify-between">
-                    <p>公開範囲の設定</p>
-                  </header>
-                  <div className="space-y-2">
-                    <button className="py-2 w-full bg-[#fbe6d2] px-2 rounded-xl">
-                      <div className="flex items-center space-x-1">
-                        <LockClosedIcon className="w-5 h-5" />
-                        <span>自分だけ</span>
-                        <span className="px-1 text-xs bg-[#F6F3EE] rounded font-bold">
-                          現在設定中
-                        </span>
-                      </div>
-                      <p className="text-xs text-left pl-6">
-                        あなた以外はこの会話を閲覧できません。悩んだらこちらを選んでおけばOKです。
-                      </p>
-                    </button>
-                    <button className="items-center py-2 px-2 w-full rounded-xl hover:bg-[#FDF8F5]">
-                      <div className="flex items-center space-x-1">
-                        <GlobeAsiaAustraliaIcon className="w-5 h-5" />
-                        <span>みんなに公開</span>
-                      </div>
-                      <p className="text-xs text-left pl-6">
-                        「みんなの会話」にこの会話が表示されます。会話を共有したい時はこちらを使いましょう。
-                      </p>
-                    </button>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </Popover.Content>
-          </Popover.Portal>
-        </Popover.Root>
-      </header>
+      {conversations.length > 0 && (
+        <header className="flex justify-end px-4 relative pr-7">
+          <VisibilitySetting currentVisibility={session.visibility} />
+        </header>
+      )}
       <section className="h-full overflow-y-scroll">
         {conversations.length === 0 && (
           <article className="p-4 ">

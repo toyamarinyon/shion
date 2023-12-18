@@ -29,6 +29,7 @@ const VisibilitySettingButton: React.FC<VisibilitySettingButtonProps> = ({
 }) => {
   return (
     <button
+      type="button"
       className={clsx(
         "py-2 w-full px-2 rounded-xl",
         selected ? "bg-[#fbe6d2]" : "hover:bg-[#FDF8F5]",
@@ -51,17 +52,14 @@ const VisibilitySettingButton: React.FC<VisibilitySettingButtonProps> = ({
 
 type VisibilitySettingProps = {
   currentVisibility: Session["visibility"];
-  loading: boolean;
 };
 export const VisibilitySetting: React.FC<VisibilitySettingProps> = ({
   currentVisibility,
-  loading,
 }) => {
   const fetcher = useFetcher();
   const visibility = match(fetcher.state)
     .with("idle", () => currentVisibility)
     .otherwise(() => {
-      console.log(fetcher?.formData?.get("visibility"));
       return parse(
         nonOptional(insertSessionSchema.entries.visibility),
         fetcher?.formData?.get("visibility"),
@@ -88,8 +86,11 @@ export const VisibilitySetting: React.FC<VisibilitySettingProps> = ({
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
         <button
+          type="button"
           className="flex items-center flex-shrink-0 space-x-1 cursor-pointer relative pr-8"
-          disabled={loading}
+          disabled={
+            fetcher.state === "submitting" || fetcher.state === "loading"
+          }
         >
           {match(visibility)
             .with("public", () => (
