@@ -2,7 +2,6 @@ import { useParseLoaderData } from "@/hooks/useParseLoaderData";
 import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import { useChat } from "ai/react";
 import clsx from "clsx";
-import { Session } from "db/schema";
 import { marked } from "marked";
 import {
   ChangeEventHandler,
