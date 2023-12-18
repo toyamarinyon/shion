@@ -66,11 +66,11 @@
 }
 
 .markdown pre {
-  @apply rounded bg-gray-100 p-4;
+  @apply rounded bg-gray-100 p-4 whitespace-pre-wrap;
 }
 
 .markdown pre code {
-  @apply block overflow-visible rounded-none bg-transparent p-0;
+  @apply block overflow-visible rounded-none bg-transparent p-0  whitespace-pre-wrap;
 }
 
 .markdown ul {

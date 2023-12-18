@@ -19,6 +19,9 @@ export const sessions = sqliteTable("sessions", {
     .notNull()
     .references(() => users.id),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  visibility: text("visibility", { enum: ["private", "public"] })
+    .notNull()
+    .default("private"),
 });
 
 export const selectSessionSchema = createSelectSchema(sessions);

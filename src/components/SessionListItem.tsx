@@ -1,6 +1,6 @@
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useSession } from "../contexts/session";
 

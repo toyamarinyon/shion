@@ -1,0 +1,1 @@
+ALTER TABLE sessions ADD `visibility` text DEFAULT 'private' NOT NULL;

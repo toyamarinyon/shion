@@ -15,6 +15,7 @@
     "@cloudflare/pages-plugin-cloudflare-access": "^1.0.3",
     "@heroicons/react": "^2.0.18",
     "@paralleldrive/cuid2": "^2.2.2",
+    "@radix-ui/react-popover": "^1.0.7",
     "ai": "^2.2.28",
     "clsx": "^2.0.0",
     "drizzle-orm": "^0.29.1",
@@ -46,6 +47,7 @@
     "tailwindcss": "^3.3.6",
     "typescript": "^5.2.2",
     "vite": "^5.0.0",
+    "vite-tsconfig-paths": "^4.2.2",
     "wrangler": "^3.19.0"
   }
 }
