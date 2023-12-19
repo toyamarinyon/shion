@@ -1,6 +1,7 @@
 import { SignedIn, SignedOut } from "@/components/controlComponents";
 import { createId } from "@paralleldrive/cuid2";
 import { Navigate, Outlet, RouteObject } from "react-router-dom";
+import { toast } from "sonner";
 import { match } from "ts-pattern";
 import { Input, array, boolean, merge, object, parse } from "valibot";
 import {
@@ -80,14 +81,19 @@ export const sessionRoute: RouteObject = {
             const formData = await request.formData();
             const jsonObject = Object.fromEntries(formData.entries());
             parse(updateSessionSchema, jsonObject);
-            const json = await fetch(`/api/sessions/${params.sessionId}`, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
+            const unsafeJson = await fetch(
+              `/api/sessions/${params.sessionId}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(parse(updateSessionSchema, jsonObject)),
               },
-              body: JSON.stringify(parse(updateSessionSchema, jsonObject)),
-            }).then((res) => res.json());
-            return parse(sessionLoaderSchema, json);
+            ).then((res) => res.json());
+            const parsedJson = parse(sessionLoaderSchema, unsafeJson);
+            toast("設定が反映されました。");
+            return parsedJson;
           })
           .otherwise(() => null);
       },
