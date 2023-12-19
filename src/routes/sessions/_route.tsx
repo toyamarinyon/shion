@@ -101,7 +101,6 @@ export const sessionRoute: RouteObject = {
         const json = await fetch(`/api/sessions/${params.sessionId}`).then(
           (res) => res.json(),
         );
-        console.log({ json });
         return parse(sessionLoaderSchema, json);
       },
       element: <Conversation />,
