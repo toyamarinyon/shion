@@ -9,9 +9,9 @@
   @apply break-words text-base leading-normal text-[#595959];
 }
 
-.markdown > * + * {
+/* .markdown > * + * {
   @apply mb-4 mt-0;
-}
+} */
 
 .markdown li + li {
   @apply mt-1;

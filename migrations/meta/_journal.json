@@ -15,6 +15,13 @@
       "when": 1702832863318,
       "tag": "0001_curvy_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1702954667508,
+      "tag": "0002_chunky_fantastic_four",
+      "breakpoints": true
     }
   ]
 }

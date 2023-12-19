@@ -8,7 +8,7 @@ export const users = sqliteTable("users", {
     .primaryKey()
     .$defaultFn(() => createId()),
   email: text("email").notNull().unique(),
-  username: text("username").notNull(),
+  username: text("username").notNull().unique(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 export const insertUsersSchema = createInsertSchema(users);

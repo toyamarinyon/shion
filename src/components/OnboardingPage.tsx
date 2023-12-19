@@ -4,24 +4,49 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useCallback, useMemo, useReducer, useState } from "react";
 import { Link } from "react-router-dom";
 import { match } from "ts-pattern";
+import { array, object, parse, picklist } from "valibot";
 import { useAccess } from "../contexts/access";
 import { useAuth } from "../contexts/auth";
+import { SystemBubble } from "./chats/SystemBubble";
 
+const createUserError = {
+  userNameAlreadyExists: "user/username-already-exists",
+} as const;
+const errorCode = picklist(Object.values(createUserError));
+
+const errorSchema = object({ errors: array(object({ code: errorCode })) });
+
+type Message =
+  | {
+      role: "assistant";
+      content: string;
+    }
+  | {
+      role: "information";
+      content: string;
+    }
+  | {
+      role: "error";
+      content: string;
+    };
 type OnboardingState =
   | {
       step: "welcome";
+      messages: Message[];
     }
   | {
       step: "registeringUsername";
       username: string;
+      messages: Message[];
     }
   | {
       step: "fullyRegisteredUsername";
       username: string;
+      messages: Message[];
     }
   | {
       step: "error";
-      error: string;
+      messages: Message[];
     };
 
 type OnboardingAction =
@@ -38,24 +63,38 @@ type OnboardingAction =
       error: string;
     };
 
-const reducer = (_: OnboardingState, action: OnboardingAction) =>
+const reducer = (state: OnboardingState, action: OnboardingAction) =>
   match(action)
     .returnType<OnboardingState>()
     .with({ type: "submitUsername" }, ({ username }) => ({
+      ...state,
       step: "registeringUsername",
       username,
     }))
     .with({ type: "fullyRegisteredUsername" }, ({ username }) => ({
+      messages: [
+        ...state.messages,
+        {
+          role: "assistant",
+          content: `${username}ですね。よろしくお願いします。左上の「会話を始める」ボタンを押してもらうとチャットを始めることができます。入力ありがとうございました！`,
+        },
+      ],
       step: "fullyRegisteredUsername",
       username,
     }))
     .with({ type: "error" }, ({ error }) => ({
+      messages: [
+        ...state.messages,
+        {
+          role: "error",
+          content: error,
+        },
+      ],
       step: "error",
-      error,
     }))
     .exhaustive();
 export const OnboardingPage: React.FC = () => {
-  const welcomeMessage = useMemo(() => {
+  const greeting = useMemo(() => {
     const now = new Date();
     const hour = now.getHours();
     if (hour >= 5 && hour < 12) {
@@ -67,10 +106,20 @@ export const OnboardingPage: React.FC = () => {
     return "こんばんは。";
   }, []);
   const [username, setUsername] = useState("");
+  const { email } = useAccess();
   const [state, dispatch] = useReducer(reducer, {
     step: "welcome",
+    messages: [
+      {
+        role: "assistant",
+        content: `${greeting}LLM実行環境のシオンです。利用にあたって、まずあなたのお名前を教えてください。本名でなくても構いません。教えてただいたお名前は、このアプリケーションでチャットの履歴を他のユーザーと共有する際に誰のチャットか識別するに使います。`,
+      },
+      {
+        role: "information",
+        content: `すでに認証は完了しています。あなたのメールアドレスは${email}ですね。\n\n教えていただいたお名前はこのメールアドレスに紐付けて覚えておくので、次回以降は入力いただきません。`,
+      },
+    ],
   });
-  const { email } = useAccess();
   const { mutate } = useAuth();
   const handleSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
@@ -95,9 +144,20 @@ export const OnboardingPage: React.FC = () => {
             dispatch({ type: "fullyRegisteredUsername", username });
           })
           .otherwise(() => {
-            dispatch({
-              type: "error",
-              error: "ユーザー名の登録に失敗しました。もう一度お試しください。",
+            res.json().then((unsafeJson) => {
+              const { errors } = parse(errorSchema, unsafeJson);
+              for (const error of errors) {
+                const message = match(error.code)
+                  .with(
+                    "user/username-already-exists",
+                    () => "そのユーザー名は既に使われています。",
+                  )
+                  .exhaustive();
+                dispatch({
+                  type: "error",
+                  error: message,
+                });
+              }
             });
           }),
       );
@@ -134,34 +194,31 @@ export const OnboardingPage: React.FC = () => {
       <main className="p-4 w-full">
         <div className="bg-gray-50 flex flex-col p-4 rounded-[30px] h-full space-y-4">
           <section className="h-full overflow-y-scroll space-y-4">
-            <div className="bg-white rounded-[30px] p-8 markdown">
-              <article className="space-y-2">
-                <p>
-                  {welcomeMessage}
-                  LLM実行環境のシオンです。利用にあたって、まずあなたのお名前を教えてください。本名でなくても構いません。教えてただいたお名前は、このアプリケーションでチャットの履歴を他のユーザーと共有する際に誰のチャットか識別するに使います。
-                </p>
-                <p>そのうち変更可能になるので、考え込む必要はありません。</p>
-              </article>
-            </div>
-            <div className="px-12 text-sm">
-              <div className="bg-indigo-50 rounded-xl px-4 py-2">
-                <span className="font-bold text-indigo-400">お知らせ</span>
-                <p>
-                  すでに認証は完了しています。あなたのメールアドレスは
-                  <span className="px-1">{email}</span>
-                  ですね。教えていただいたお名前はこのメールアドレスに紐付けて覚えておくので、次回以降は入力いただきません。
-                </p>
-              </div>
-            </div>
-            {state.step === "fullyRegisteredUsername" && (
-              <div className="bg-white rounded-[30px] p-8 markdown">
-                <article className="space-y-2">
-                  <p>
-                    {state.username}{" "}
-                    ですね。よろしくお願いします。左上の「会話を始める」ボタンを押してもらうとチャットを始めることができます。入力ありがとうございました！
-                  </p>
-                </article>
-              </div>
+            {state.messages.map(({ role, content }) =>
+              match(role)
+                .with("assistant", () => (
+                  <div
+                    className="bg-white rounded-[30px] p-8 markdown"
+                    key={content}
+                  >
+                    <article className="space-y-2">{content}</article>
+                  </div>
+                ))
+                .with("information", () => (
+                  <SystemBubble
+                    markdownContent={content}
+                    variant="information"
+                    key={content}
+                  />
+                ))
+                .with("error", () => (
+                  <SystemBubble
+                    markdownContent={content}
+                    variant="alert"
+                    key={content}
+                  />
+                ))
+                .exhaustive(),
             )}
           </section>
           <section className="mt-auto flex justify-center">
