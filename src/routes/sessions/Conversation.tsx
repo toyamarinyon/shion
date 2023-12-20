@@ -1,5 +1,4 @@
 import { useParseLoaderData } from "@/hooks/useParseLoaderData";
-import { throttle } from "@github/mini-throttle";
 import {
   GlobeAsiaAustraliaIcon,
   PaperAirplaneIcon,
@@ -14,6 +13,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { useFetcher, useNavigate, useRevalidator } from "react-router-dom";
 import { match } from "ts-pattern";
@@ -21,6 +21,7 @@ import { useSession } from "../../contexts/session";
 import { sessionLoaderSchema } from "./_route";
 import { UpdateIndicator } from "./components/UpdateIndicator";
 import { VisibilitySetting } from "./components/VisivilitySetting";
+import { useScrollHandler } from "./hooks/useScrollHandler";
 
 type ConversationItem = {
   id: string;
@@ -66,22 +67,36 @@ export const Conversation: React.FC = () => {
     return "こんばんは。";
   }, []);
   const ref = useRef<HTMLDivElement>(null);
-
+  const [autoScroll, setAutoScroll] = useState(true);
+  useScrollHandler({
+    container: ref,
+    onScrollUpward: () => {
+      setAutoScroll(false);
+    },
+    onContainerScrollToBottom() {
+      setAutoScroll(true);
+    },
+  });
   useEffect(() => {
-    if (!isLoading || messages.length === 0 || ref.current == null) {
-      return;
+    let timer: NodeJS.Timeout | null = null;
+
+    if (autoScroll && isLoading) {
+      timer = setInterval(() => {
+        if (ref.current != null) {
+          ref.current.scrollTo({
+            top: ref.current.scrollHeight,
+          });
+        }
+      }, 500);
     }
-    const scrollContainerHeight = ref.current.getBoundingClientRect().height;
-    const currentScrollTop = ref.current.scrollTop;
-    const scrollHeight = ref.current.scrollHeight;
-    if (scrollHeight - scrollContainerHeight - currentScrollTop < 200) {
-      throttle(() => {
-        ref.current?.scrollTo({
-          top: ref.current.scrollHeight,
-        });
-      }, 300)();
-    }
-  }, [messages, isLoading]);
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [isLoading, autoScroll]);
+
   const conversations = useMemo(() => {
     const tmp: ConversationItem[] = [];
     let lastRequestContent = "";
