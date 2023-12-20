@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@cloudflare/pages-plugin-cloudflare-access": "^1.0.3",
-    "@github/mini-throttle": "^2.1.1",
     "@heroicons/react": "^2.0.18",
     "@paralleldrive/cuid2": "^2.2.2",
     "@radix-ui/react-popover": "^1.0.7",
