@@ -1,4 +1,5 @@
 import { useParseLoaderData } from "@/hooks/useParseLoaderData";
+import { throttle } from "@github/mini-throttle";
 import {
   GlobeAsiaAustraliaIcon,
   PaperAirplaneIcon,
@@ -10,6 +11,7 @@ import {
   ChangeEventHandler,
   FormEvent,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
 } from "react";
@@ -32,7 +34,7 @@ export const Conversation: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useParseLoaderData(sessionLoaderSchema);
   const { myOwnSession } = session;
-  const { messages, input, append, setInput } = useChat({
+  const { messages, input, append, setInput, isLoading } = useChat({
     id,
     api: "/api/conversation",
     body: {
@@ -63,6 +65,23 @@ export const Conversation: React.FC = () => {
     }
     return "こんばんは。";
   }, []);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isLoading || messages.length === 0 || ref.current == null) {
+      return;
+    }
+    const scrollContainerHeight = ref.current.getBoundingClientRect().height;
+    const currentScrollTop = ref.current.scrollTop;
+    const scrollHeight = ref.current.scrollHeight;
+    if (scrollHeight - scrollContainerHeight - currentScrollTop < 200) {
+      throttle(() => {
+        ref.current?.scrollTo({
+          top: ref.current.scrollHeight,
+        });
+      }, 300)();
+    }
+  }, [messages, isLoading]);
   const conversations = useMemo(() => {
     const tmp: ConversationItem[] = [];
     let lastRequestContent = "";
@@ -155,7 +174,7 @@ export const Conversation: React.FC = () => {
           )}
         </header>
       )}
-      <section className="h-full overflow-y-scroll">
+      <section className="h-full overflow-y-scroll" ref={ref}>
         {conversations.length === 0 && (
           <article className="p-4 ">
             <header className="text-2xl">
