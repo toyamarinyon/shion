@@ -81,6 +81,9 @@ export const createMessages = async ({
     .returning({ insertedId: schema.messages.id });
 };
 
+const resource = "plain-edge-openai-devl";
+const model = "gpt-35-turbo-16k";
+
 export const onRequestPost: PagesFunction<Env, string, Context> = async ({
   request,
   env,
@@ -88,6 +91,9 @@ export const onRequestPost: PagesFunction<Env, string, Context> = async ({
 }) => {
   const openai = new OpenAI({
     apiKey: env.OPENAI_API_KEY,
+    baseURL: `https://${resource}.openai.azure.com/openai/deployments/${model}`,
+    defaultQuery: { "api-version": "2023-06-01-preview" },
+    defaultHeaders: { "api-key": env.OPENAI_API_KEY },
   });
   const body = await request.json();
   const { messages, isNew, sessionId } = parse(requestSchema, body);
