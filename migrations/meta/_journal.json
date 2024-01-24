@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1702605053077,
-      "tag": "0000_cool_tiger_shark",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1702832863318,
-      "tag": "0001_curvy_sabra",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1702954667508,
-      "tag": "0002_chunky_fantastic_four",
+      "when": 1706056888861,
+      "tag": "0000_married_otto_octavius",
       "breakpoints": true
     }
   ]
