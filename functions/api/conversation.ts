@@ -130,7 +130,7 @@ export const onRequestPost: PagesFunction<Env, string, Context> = async ({
   });
 
   const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-3.5-turbo-default",
     stream: true,
     messages,
   });
@@ -155,7 +155,7 @@ export const onRequestPost: PagesFunction<Env, string, Context> = async ({
             .otherwise(() => ""),
         );
         const response = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo-1106",
+          model: "gpt-3.5-turbo-default",
           response_format: { type: "json_object" },
 
           messages: [
