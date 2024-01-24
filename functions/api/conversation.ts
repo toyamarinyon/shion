@@ -81,14 +81,13 @@ export const createMessages = async ({
     .returning({ insertedId: schema.messages.id });
 };
 
-const resource = "plain-edge-openai-devl";
-const model = "gpt-35-turbo-16k";
-
 export const onRequestPost: PagesFunction<Env, string, Context> = async ({
   request,
   env,
   data,
 }) => {
+  const resource = env.AZURE_OPENAI_RESOURCE;
+  const model = "gpt-35-turbo-16k";
   const openai = new OpenAI({
     apiKey: env.OPENAI_API_KEY,
     baseURL: `https://${resource}.openai.azure.com/openai/deployments/${model}`,
