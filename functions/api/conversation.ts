@@ -87,7 +87,7 @@ export const onRequestPost: PagesFunction<Env, string, Context> = async ({
   data,
 }) => {
   const resource = env.AZURE_OPENAI_RESOURCE;
-  const model = "gpt-35-turbo-16k";
+  const model = env.AZURE_OPENAI_DEPLOYMENT_MODEL;
   const openai = new OpenAI({
     apiKey: env.OPENAI_API_KEY,
     baseURL: `https://${resource}.openai.azure.com/openai/deployments/${model}`,
